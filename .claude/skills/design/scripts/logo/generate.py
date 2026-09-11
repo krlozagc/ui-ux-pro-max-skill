@@ -80,6 +80,24 @@ ATLAS_MAX_POLLS = 90
 MUAPI_POLL_INTERVAL = 2
 MUAPI_MAX_POLLS = 90
 
+# Third-party disclosure shown before the first Atlas Cloud / MuAPI network
+# call: --provider atlas and --provider muapi are opt-in and send the
+# (enhanced) text prompt off-host to Atlas Cloud / MuAPI respectively, each
+# requiring its own API key (ATLASCLOUD_API_KEY / MUAPI_API_KEY). This does
+# not change .env loading -- it only surfaces the fact before the request.
+THIRD_PARTY_PROVIDER_NAMES = {"atlas": "Atlas Cloud", "muapi": "MuAPI"}
+
+
+def _warn_third_party_provider(provider):
+    """Print a one-time-per-run notice before sending the prompt to a third-party provider."""
+    name = THIRD_PARTY_PROVIDER_NAMES.get(provider)
+    if name:
+        print(
+            f"Notice: --provider {provider} sends your text prompt to {name}, "
+            f"a third-party service, and requires its own API key."
+        )
+
+
 # Supported aspect ratios
 ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"]
 DEFAULT_ASPECT_RATIO = "1:1"  # Square is ideal for logos
@@ -529,6 +547,7 @@ def generate_logo(
     print(f"Aspect ratio: {ratio}")
     print(f"Prompt: {full_prompt[:150]}...")
     print()
+    _warn_third_party_provider(provider)
 
     try:
         if provider == "atlas":
